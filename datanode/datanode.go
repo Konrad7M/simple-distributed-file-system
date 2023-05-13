@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"sync"
 
 	"google.golang.org/grpc"
@@ -45,14 +46,14 @@ func Create(conf Config) (*DataNodeState, error) {
 	}
 	defer conn.Close()
 
-	clientConnection, err := net.Listen("tcp", "8085")
+	clientConnection, err := net.Dial("tcp", "8085")
 	if err != nil {
 		fmt.Println(err)
 		return &dn, err
 	}
 	defer clientConnection.Close()
 
-	go 
+	go handleConnection(clientConnection)
 
 	c := pb.NewBlockReportfServiceClient(conn)
 
@@ -62,14 +63,14 @@ func Create(conf Config) (*DataNodeState, error) {
 }
 
 func handleConnection(c net.Conn) {
-    buf := make([]byte, 4096)
+	buf := make([]byte, 4096)
 
-    for {
-        n, err := c.Read(buf)
-        if err != nil || n == 0 {
-           break
-        }
-    }
+	for {
+		n, err := c.Read(buf)
+		if err != nil || n == 0 {
+			break
+		}
+	}
 
 	chunkSize := 100
 	fileName := "czumuliugnma"
