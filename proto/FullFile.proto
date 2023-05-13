@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+message FullFile {
+  bytes data = 1;
+}
+
+service FullFileService {
+  rpc SendFile(stream FileChunk) returns (FileResponse) {}
+}
+
+message FullFileResponse {
+  string message = 1;
+}

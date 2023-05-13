@@ -2,10 +2,13 @@ package datanode
 
 import (
 	pb "aleksrosz/simple-distributed-file-system/proto"
+	"fmt"
+	"log"
+	"net"
+	"sync"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"sync"
 )
 
 var Debug bool //TODO debug
@@ -42,9 +45,49 @@ func Create(conf Config) (*DataNodeState, error) {
 	}
 	defer conn.Close()
 
-	c := pb.NewBlockReportServiceClient(conn)
+	clientConnection, err := net.Listen("tcp", "8085")
+	if err != nil {
+		fmt.Println(err)
+		return &dn, err
+	}
+	defer clientConnection.Close()
+
+	go 
+
+	c := pb.NewBlockReportfServiceClient(conn)
 
 	createBlockReport(c)
 
 	return &dn, nil
+}
+
+func handleConnection(c net.Conn) {
+    buf := make([]byte, 4096)
+
+    for {
+        n, err := c.Read(buf)
+        if err != nil || n == 0 {
+           break
+        }
+    }
+
+	chunkSize := 100
+	fileName := "czumuliugnma"
+
+	// Create output files for each chunk
+	chunkNum := 1
+	for {
+		chunkName := fmt.Sprintf("%s.%03d", fileName, chunkNum)
+		chunkFile, err := os.Create(chunkName)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer chunkFile.Close()
+		// Read input data and write to the output file
+		buf := make([]byte, chunkSize)
+		chunkFile.Write(buf[:n])
+		// Increment the chunk number and continue until end of file
+		chunkNum++
+	}
 }
