@@ -102,33 +102,37 @@ func (s *handleFileRequestServiceServer) HandleFileService(ctx context.Context, 
 func ListenFileRequestServiceServer(adres string) {
 	lis, err := net.Listen("tcp", adres)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("failed to listen: %v"+common.GetTraceString(), err)
 	}
 	defer lis.Close()
 	log.Printf("Listening on %s", adres)
 	s := grpc.NewServer()
 	file_request.RegisterHandleFileRequestsServiceServer(s, &handleFileRequestServiceServer{})
 	// TODO RFC czemu to jest podkreślane
+	// W visual studio code nie jest podkreślane
 	err = s.Serve(lis)
 	if err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("failed to serve: %v"+common.GetTraceString(), err)
 	}
 }
 
 func ListenHealthCheckServer(adres string) {
 	lis, err := net.Listen("tcp", adres)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("failed to listen: %v"+common.GetTraceString(), err)
+		// TODO RFC coś konkuruje o port używany w tej funkcji - edit w programie data node'a
+		// prawdopodognie port nie jest nigdy zamykany
 	}
 	log.Printf("Listening on %s", adres)
 	s := grpc.NewServer()
-	//defer s.Stop()
 	defer lis.Close()
+	defer s.Stop()
+
 	pb2.RegisterHealthServer(s, &healthCheckServer{})
 	common.Trace()
 	err = s.Serve(lis)
 	if err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("failed to serve: %v"+common.GetTraceString(), err)
 	}
 	common.Trace()
 }
@@ -139,7 +143,7 @@ func SendBlockReport(adres string) {
 		conn, err := grpc.Dial(adres, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		common.Trace()
 		if err != nil {
-			log.Fatal("failed to connect", err)
+			log.Fatal("failed to connect"+common.GetTraceString(), err)
 		}
 		defer conn.Close()
 		c := block_report.NewBlockReportServiceClient(conn)

@@ -1,15 +1,17 @@
 package metadatanode
 
 import (
+	"aleksrosz/simple-distributed-file-system/common"
 	pb "aleksrosz/simple-distributed-file-system/proto/block_report"
 	pb2 "aleksrosz/simple-distributed-file-system/proto/health_check"
 	"fmt"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var Debug bool //TODO debug
@@ -32,7 +34,7 @@ var DatanodeDatabase = NewDatanodeDatabase()
 func ListenBlockReportServiceServer(adres string) {
 	lis, err := net.Listen("tcp", adres)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("failed to listen: %v+common.GetTraceString()", err)
 	}
 
 	log.Printf("Listening on %s", adres)
@@ -41,7 +43,7 @@ func ListenBlockReportServiceServer(adres string) {
 
 	err = s.Serve(lis)
 	if err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("failed to serve: %v+common.GetTraceString()", err)
 	}
 
 }
@@ -50,13 +52,13 @@ func QueryHealthCheck(adres string, dataNodeNumber int32) (*pb2.HealthCheckRespo
 	//Connect for health check
 	conn, err := grpc.Dial(adres, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatal("TEST TEST failed to connect", err)
+		log.Fatal("TEST TEST failed to connect"+common.GetTraceString(), err)
 	}
 	defer conn.Close()
 	c := pb2.NewHealthClient(conn)
 	data, err := queryHealthCheck(c)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error: %v"+common.GetTraceString(), err)
 	}
 	log.Printf("Response from server: %v", data)
 	fmt.Println(adres)
