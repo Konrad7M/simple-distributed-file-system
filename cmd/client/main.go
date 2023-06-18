@@ -8,7 +8,7 @@ package main
 // Tell which file should be uploaded to DFS
 
 import (
-	"aleksrosz/simple-distributed-file-system/constants"
+	"aleksrosz/simple-distributed-file-system/common"
 	"aleksrosz/simple-distributed-file-system/proto/file_request"
 	"bytes"
 	"context"
@@ -25,7 +25,7 @@ import (
 func main() {
 	// Parse command-line flags
 	serverIP := flag.String("s", "0.0.0.0", "Server IP address")
-	port := flag.String("p", fmt.Sprint(constants.DataNodeClientListenerPort), "Network port")
+	port := flag.String("p", fmt.Sprint(common.DataNodeClientListenerPort), "Network port")
 	filePath := flag.String("f", "default.txt", "Path of file to send")
 	commandString := flag.String("c", "write", "command to be executed: write, read, delete")
 	flag.Parse()

@@ -1,6 +1,7 @@
 package datanode
 
 import (
+	"aleksrosz/simple-distributed-file-system/common"
 	"aleksrosz/simple-distributed-file-system/proto/block_report"
 	"aleksrosz/simple-distributed-file-system/proto/file_request"
 	"bytes"
@@ -108,12 +109,10 @@ func ListenFileRequestServiceServer(adres string) {
 	s := grpc.NewServer()
 	file_request.RegisterHandleFileRequestsServiceServer(s, &handleFileRequestServiceServer{})
 	// TODO RFC czemu to jest podkreślane
-
 	err = s.Serve(lis)
 	if err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-
 }
 
 func ListenHealthCheckServer(adres string) {
@@ -121,26 +120,24 @@ func ListenHealthCheckServer(adres string) {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-
 	log.Printf("Listening on %s", adres)
 	s := grpc.NewServer()
 	//defer s.Stop()
 	defer lis.Close()
 	pb2.RegisterHealthServer(s, &healthCheckServer{})
-	fmt.Println("test1")
-
+	common.Trace()
 	err = s.Serve(lis)
 	if err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-	fmt.Println("test2")
+	common.Trace()
 }
 
 func SendBlockReport(adres string) {
 	for {
 		//Connect for block report
 		conn, err := grpc.Dial(adres, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		fmt.Println("test3")
+		common.Trace()
 		if err != nil {
 			log.Fatal("failed to connect", err)
 		}
