@@ -6,7 +6,9 @@ import (
 	"aleksrosz/simple-distributed-file-system/proto/file_request"
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 
 	pb2 "aleksrosz/simple-distributed-file-system/proto/health_check"
 	"fmt"
@@ -93,7 +95,16 @@ func (s *handleFileRequestServiceServer) HandleFileService(ctx context.Context, 
 				FileSize: 0,
 			}, nil
 		}
-
+	case 2:
+		{
+			files := getFileList()
+			x, _ := json.Marshal(files)
+			return &file_request.FileResponse{
+				Message:  string(x),
+				FileName: "",
+				FileSize: 0,
+			}, nil
+		}
 	}
 	unknownCommandErr := errors.New("unknown command")
 	return &file_request.FileResponse{}, unknownCommandErr
@@ -219,6 +230,22 @@ func deleteChunks(fileName string) {
 			return
 		}
 	}
+}
+
+func getFileList() []string {
+	files, err := ioutil.ReadDir(dataDir)
+	if err != nil {
+		fmt.Print("could not read directory" + common.GetTraceString())
+	}
+	fileSet := make(map[string]bool, 0)
+	for _, file := range files {
+		fileSet[file.Name()] = true
+	}
+	uniqueFiles := make([]string, 0)
+	for k := range fileSet {
+		uniqueFiles = append(uniqueFiles, k)
+	}
+	return uniqueFiles
 }
 
 func create(p string) (*os.File, error) {
