@@ -9,14 +9,15 @@ import (
 
 	pb2 "aleksrosz/simple-distributed-file-system/proto/health_check"
 	"fmt"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var Debug bool //TODO debug
@@ -102,7 +103,7 @@ func ListenFileRequestServiceServer(adres string) {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-
+	defer lis.Close()
 	log.Printf("Listening on %s", adres)
 	s := grpc.NewServer()
 	file_request.RegisterHandleFileRequestsServiceServer(s, &handleFileRequestServiceServer{})
@@ -120,8 +121,11 @@ func ListenHealthCheckServer(adres string) {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	log.Printf("Listening on %s", adres)
 	s := grpc.NewServer()
+	//defer s.Stop()
+	defer lis.Close()
 	pb2.RegisterHealthServer(s, &healthCheckServer{})
 	fmt.Println("test1")
 

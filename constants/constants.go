@@ -1,8 +1,5 @@
 package constants
 
-const (
-	dataNodeClientListenerPort       = 8085
-	dataNodeHealthCheckListenerPort  = 8086
-	metaDataNodeBlockListeningPort   = 8081
-	metaDataNodeBlockHealthCheckPort = 8087
-)
+const MetaDataNodeBlockReportListeningPort = 8080
+const DataNodeClientListenerPort = 8082
+const DataNodeHealthCheckListenerPort = 8081
