@@ -12,8 +12,10 @@ import (
 	"aleksrosz/simple-distributed-file-system/proto/file_request"
 	"bytes"
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,6 +35,7 @@ func main() {
 	m["write"] = 1
 	m["read"] = 0
 	m["delete"] = -1
+	m["list"] = 2
 	commandNumber := m[*commandString]
 
 	// Check if required flags are set
@@ -76,6 +79,27 @@ func main() {
 		}
 		file, err := create(fileName)
 		file.Write(response.FileData)
+		return
+	}
+	if commandNumber == 2 {
+		request := file_request.FileCommand{
+			FileCommand: int32(commandNumber),
+			FileName:    "",
+			FileSize:    0,
+			FileData:    nil,
+		}
+		response, err := fileRequestClient.SendFileRequest(context.Background(), &request)
+		if err != nil {
+			println(err)
+			return
+		}
+		var fileList []string
+		err = json.Unmarshal([]byte(response.Message), &fileList)
+		if err != nil {
+			log.Fatalf(err.Error() + common.GetTraceString())
+		}
+		println("Files in the file system:")
+		println(fileList)
 		return
 	}
 	// Open the input file
